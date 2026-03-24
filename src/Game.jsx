@@ -4,6 +4,94 @@ import { doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import Camera from './Camera';
 import Profile from './Profile';
 
+
+function DartPad({ accent, onScore }) {
+  const [multiplier, setMultiplier] = useState(1);
+  const [selected, setSelected]     = useState(null);
+
+const SECTORS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+
+  const multLabel = { 1: 'Simple', 2: 'Double', 3: 'Triple' };
+  const multColor = { 1: '#888', 2: '#2979FF', 3: '#FF9100' };
+
+  const confirm = (sector) => {
+    const s = sector ?? selected;
+    if (s === null) return;
+    let score, label;
+    if (s === 'BULL')  { score = 25;       label = 'BULL';        }
+    else if (s === 'DBULL') { score = 50;  label = 'DOUBLE BULL'; }
+    else { score = s * multiplier; label = multiplier === 2 ? `D${s}` : multiplier === 3 ? `T${s}` : `${s}`; }
+    onScore({ score, label, multiplier: s === 'BULL' || s === 'DBULL' ? 1 : multiplier });
+  };
+
+  return (
+    <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 10 }} className="fade-in">
+
+      {/* Multiplicateur */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        {[1, 2, 3].map(m => (
+          <button key={m} onClick={() => setMultiplier(m)} style={{
+            flex: 1, padding: '10px 0', borderRadius: 8, fontWeight: 700,
+            fontSize: 13, cursor: 'pointer', fontFamily: 'Inter',
+            background: multiplier === m ? `${multColor[m]}22` : 'transparent',
+            border: `2px solid ${multiplier === m ? multColor[m] : 'var(--border)'}`,
+            color: multiplier === m ? multColor[m] : 'var(--text3)',
+            transition: 'all 0.15s',
+          }}>
+            {multLabel[m]}
+          </button>
+        ))}
+      </div>
+
+      {/* Aperçu score */}
+      <div style={{ textAlign: 'center', marginBottom: 12, minHeight: 32 }}>
+        {selected !== null && selected !== 'BULL' && selected !== 'DBULL' && (
+          <span style={{ fontFamily: "'Bebas Neue'", fontSize: 28, letterSpacing: 3, color: accent }}>
+            {multiplier === 2 ? `D${selected}` : multiplier === 3 ? `T${selected}` : selected}
+            {' = '}
+            <span style={{ color: '#fff' }}>{selected * multiplier} pts</span>
+          </span>
+        )}
+      </div>
+
+      {/* Grille secteurs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 10 }}>
+        {SECTORS.map(n => (
+          <button key={n} onClick={() => { setSelected(n); confirm(n); }} style={{
+            padding: '11px 0', borderRadius: 7, fontWeight: 800,
+            fontSize: 15, cursor: 'pointer',
+            fontFamily: "'Bebas Neue'", letterSpacing: 1,
+            background: selected === n ? `${accent}22` : 'var(--bg3)',
+            border: `1px solid ${selected === n ? accent : 'var(--border)'}`,
+            color: selected === n ? accent : '#fff',
+            transition: 'all 0.1s',
+          }}>
+            {n}
+          </button>
+        ))}
+      </div>
+
+      {/* Bull */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <button onClick={() => confirm('BULL')} style={{
+          padding: '12px 0', borderRadius: 8, fontWeight: 700,
+          fontSize: 14, cursor: 'pointer', fontFamily: 'Inter',
+          background: 'rgba(0,230,118,0.1)', border: '1px solid #00E676', color: '#00E676',
+        }}>
+          🟢 Bull — 25
+        </button>
+        <button onClick={() => confirm('DBULL')} style={{
+          padding: '12px 0', borderRadius: 8, fontWeight: 700,
+          fontSize: 14, cursor: 'pointer', fontFamily: 'Inter',
+          background: 'rgba(255,23,68,0.1)', border: '1px solid var(--danger)', color: 'var(--danger)',
+        }}>
+          🔴 Double Bull — 50
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Game({ user, roomCode, onLeave }) {
   const [gameData, setGameData]       = useState(null);
   const [dartsThisTurn, setDarts]     = useState([]);
@@ -331,30 +419,13 @@ export default function Game({ user, roomCode, onLeave }) {
           )}
         </div>
       )}
-
-      {/* Pavé numérique */}
-      {showManual && isMyTurn && (
-        <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginTop: 10 }} className="fade-in">
-          <div style={{ textAlign: 'center', fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: 4, color: accent, marginBottom: 12, minHeight: 44 }}>
-            {manualInput || '—'}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-            {['1','2','3','4','5','6','7','8','9','DEL','0','OK'].map(k => (
-              <button key={k} onClick={() => handleManualInput(k)} style={{
-                padding: '14px 0', borderRadius: 8, fontWeight: 700,
-                fontSize: k === 'OK' ? 14 : k === 'DEL' ? 13 : 18,
-                cursor: 'pointer', fontFamily: k === 'OK' || k === 'DEL' ? 'Inter' : "'Bebas Neue'",
-                background: k === 'OK' ? `${accent}22` : k === 'DEL' ? 'rgba(255,23,68,0.1)' : 'var(--bg3)',
-                border: `1px solid ${k === 'OK' ? accent : k === 'DEL' ? 'var(--danger)' : 'var(--border)'}`,
-                color: k === 'OK' ? accent : k === 'DEL' ? 'var(--danger)' : '#fff',
-              }}>
-                {k}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
+        {/* Pavé fléchettes */}
+        {showManual && isMyTurn && (
+        <DartPad accent={accent} onScore={(result) => {
+            handleDartScored(result);
+            setShowManual(false);
+        }} />
+        )}
       {/* Bouton fin de tour */}
       {isMyTurn && (dartsThisTurn.length > 0 || bust) && (
         <button onClick={() => endTurn()} style={{
