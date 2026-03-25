@@ -3,6 +3,7 @@ import { db } from './firebase';
 import { doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import Camera from './Camera';
 import Profile from './Profile';
+import VideoCall from './VideoCall';
 
 
 function DartPad({ accent, onScore }) {
@@ -402,6 +403,8 @@ export default function Game({ user, roomCode, onLeave }) {
           </div>
         )}
       </div>
+
+      <VideoCall roomCode={roomCode} user={user} players={gameData.players} />
 
       {/* Caméra */}
       <Camera onDartScored={handleDartScored} disabled={!isMyTurn || dartsThisTurn.length >= 3 || bust} />
