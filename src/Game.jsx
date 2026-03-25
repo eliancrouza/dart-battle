@@ -6,6 +6,64 @@ import Profile from './Profile';
 import VideoCall from './VideoCall';
 
 
+function getCheckoutSuggestions(score) {
+  if (score > 170 || score <= 1) return [];
+
+  // Combinaisons classiques de checkout
+  const checkouts = {
+    170: ['T20','T20','DB'], 167: ['T20','T19','DB'], 164: ['T20','T18','DB'],
+    161: ['T20','T17','DB'], 160: ['T20','T20','D20'], 158: ['T20','T20','D19'],
+    157: ['T20','T19','D20'], 156: ['T20','T20','D18'], 155: ['T20','T19','D19'],
+    154: ['T20','T18','D20'], 153: ['T20','T19','D18'], 152: ['T20','T20','D16'],
+    151: ['T20','T17','D20'], 150: ['T20','T18','D18'], 149: ['T20','T19','D16'],
+    148: ['T20','T16','D20'], 147: ['T20','T17','D18'], 146: ['T20','T18','D16'],
+    145: ['T20','T15','D20'], 144: ['T20','T20','D12'], 143: ['T20','T17','D16'],
+    142: ['T20','T14','D20'], 141: ['T20','T15','D18'], 140: ['T20','T16','D16'],
+    139: ['T20','T13','D20'], 138: ['T20','T14','D18'], 137: ['T20','T15','D16'],
+    136: ['T20','T20','D8'],  135: ['T20','T13','D18'], 134: ['T20','T14','D16'],
+    133: ['T20','T11','D20'], 132: ['T20','T16','D12'], 131: ['T20','T13','D16'],
+    130: ['T20','T18','D8'],  129: ['T19','T16','D12'],128: ['T18','T14','D16'],
+    127: ['T20','T17','D8'],  126: ['T19','T15','D12'],125: ['T20','T11','D16'],
+    124: ['T20','T16','D8'],  123: ['T19','T14','D12'],122: ['T18','T12','D16'],
+    121: ['T20','T11','D14'], 120: ['T20','S20','D20'],119: ['T19','T12','D13'],
+    118: ['T20','S18','D20'], 117: ['T20','S17','D20'],116: ['T20','S16','D20'],
+    115: ['T20','S15','D20'], 114: ['T20','S14','D20'],113: ['T20','S13','D20'],
+    112: ['T20','S12','D20'], 111: ['T20','S11','D20'],110: ['T20','S10','D20'],
+    109: ['T20','S9','D20'],  108: ['T20','S8','D20'], 107: ['T19','S10','D20'],
+    106: ['T20','S6','D20'],  105: ['T20','S5','D20'], 104: ['T20','S4','D20'],
+    103: ['T20','S3','D20'],  102: ['T20','S2','D20'], 101: ['T20','S1','D20'],
+    100: ['T20','D20'],       99:  ['T19','S10','D16'],98:  ['T20','D19'],
+    97:  ['T19','D20'],       96:  ['T20','D18'],      95:  ['T19','D19'],
+    94:  ['T18','D20'],       93:  ['T19','D18'],      92:  ['T20','D16'],
+    91:  ['T17','D20'],       90:  ['T18','D18'],      89:  ['T19','D16'],
+    88:  ['T16','D20'],       87:  ['T17','D18'],      86:  ['T18','D16'],
+    85:  ['T15','D20'],       84:  ['T16','D18'],      83:  ['T17','D16'],
+    82:  ['T14','D20'],       81:  ['T15','D18'],      80:  ['T16','D16'],
+    79:  ['T13','D20'],       78:  ['T14','D18'],      77:  ['T15','D16'],
+    76:  ['T12','D20'],       75:  ['T13','D18'],      74:  ['T14','D16'],
+    73:  ['T11','D20'],       72:  ['T12','D18'],      71:  ['T13','D16'],
+    70:  ['T10','D20'],       69:  ['T11','D18'],      68:  ['T12','D16'],
+    67:  ['T9','D20'],        66:  ['T10','D18'],      65:  ['T11','D16'],
+    64:  ['T8','D20'],        63:  ['T9','D18'],       62:  ['T10','D16'],
+    61:  ['T7','D20'],        60:  ['S20','D20'],      59:  ['S19','D20'],
+    58:  ['S18','D20'],       57:  ['S17','D20'],      56:  ['S16','D20'],
+    55:  ['S15','D20'],       54:  ['S14','D20'],      53:  ['S13','D20'],
+    52:  ['S12','D20'],       51:  ['S11','D20'],      50:  ['DB'],
+    49:  ['S9','D20'],        48:  ['S8','D20'],       47:  ['S7','D20'],
+    46:  ['S6','D20'],        45:  ['S5','D20'],       44:  ['S4','D20'],
+    43:  ['S3','D20'],        42:  ['S2','D20'],       41:  ['S1','D20'],
+    40:  ['D20'],             38:  ['D19'],            36:  ['D18'],
+    34:  ['D17'],             32:  ['D16'],            30:  ['D15'],
+    28:  ['D14'],             26:  ['D13'],            24:  ['D12'],
+    22:  ['D11'],             20:  ['D10'],            18:  ['D9'],
+    16:  ['D8'],              14:  ['D7'],             12:  ['D6'],
+    10:  ['D5'],              8:   ['D4'],             6:   ['D3'],
+    4:   ['D2'],              2:   ['D1'],
+  };
+
+  return checkouts[score] || [];
+}
+
 function DartPad({ accent, onScore }) {
   const [multiplier, setMultiplier] = useState(1);
   const [selected, setSelected]     = useState(null);
@@ -369,43 +427,62 @@ export default function Game({ user, roomCode, onLeave }) {
         </div>
       )}
 
-      {/* Indicateur de tour */}
-      <div style={{ textAlign: 'center', padding: '10px 0', marginBottom: 12, borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        {isMyTurn ? (
-          <div>
-            <div style={{ fontFamily: "'Bebas Neue'", fontSize: 18, letterSpacing: 3, color: accent, marginBottom: 8 }}>
-              🎯 TON TOUR
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  border: `2px solid ${i < dartsThisTurn.length ? accent : 'var(--border)'}`,
-                  background: i < dartsThisTurn.length ? `${accent}22` : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, color: accent, fontWeight: 700,
-                  transition: 'all 0.2s',
-                }}>
-                  {i < dartsThisTurn.length ? dartsThisTurn[i].label : ''}
-                </div>
-              ))}
-              <span style={{ color: 'var(--text3)', fontSize: 14, marginLeft: 8 }}>
-                = <b style={{ color: bust ? 'var(--danger)' : '#fff', fontSize: 16 }}>{bust ? 'BUST!' : turnScore}</b>
-              </span>
-            </div>
+{/* Indicateur de tour */}
+<div style={{ textAlign: 'center', padding: '10px 0', marginBottom: 12, borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+  {isMyTurn ? (
+    <div>
+      <div style={{ fontFamily: "'Bebas Neue'", fontSize: 18, letterSpacing: 3, color: accent, marginBottom: 8 }}>
+        🎯 TON TOUR
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            width: 36, height: 36, borderRadius: '50%',
+            border: `2px solid ${i < dartsThisTurn.length ? accent : 'var(--border)'}`,
+            background: i < dartsThisTurn.length ? `${accent}22` : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, color: accent, fontWeight: 700, transition: 'all 0.2s',
+          }}>
+            {i < dartsThisTurn.length ? dartsThisTurn[i].label : ''}
           </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <span style={{ fontSize: 20 }}>{currentPlayer?.avatar}</span>
-            <span style={{ color: 'var(--text3)', fontSize: 13 }}>
-              Tour de <b style={{ color: currentPlayer?.color || '#fff' }}>{currentPlayer?.name}</b>
-            </span>
-          </div>
-        )}
+        ))}
+        <span style={{ color: 'var(--text3)', fontSize: 14, marginLeft: 8 }}>
+          = <b style={{ color: bust ? 'var(--danger)' : '#fff', fontSize: 16 }}>{bust ? 'BUST!' : turnScore}</b>
+        </span>
       </div>
 
-      <VideoCall roomCode={roomCode} user={user} players={gameData.players} />
+      {/* Suggestions de checkout */}
+      {me.score - turnScore <= 170 && getCheckoutSuggestions(me.score - turnScore).length > 0 && (
+        <div style={{ marginTop: 10, padding: '8px 12px', background: 'rgba(255,145,0,0.08)', border: '1px solid rgba(255,145,0,0.3)', borderRadius: 8, textAlign: 'left' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, color: '#FF9100', marginBottom: 6 }}>
+            💡 CHECKOUT POSSIBLE
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {getCheckoutSuggestions(me.score - turnScore).map((s, i) => (
+              <span key={i} style={{
+                background: 'rgba(255,145,0,0.15)', border: '1px solid rgba(255,145,0,0.4)',
+                borderRadius: 6, padding: '4px 10px',
+                fontFamily: 'monospace', fontWeight: 700,
+                fontSize: 14, color: '#FF9100',
+              }}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  ) : (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+      <span style={{ fontSize: 20 }}>{currentPlayer?.avatar}</span>
+      <span style={{ color: 'var(--text3)', fontSize: 13 }}>
+        Tour de <b style={{ color: currentPlayer?.color || '#fff' }}>{currentPlayer?.name}</b>
+      </span>
+    </div>
+  )}
+</div>
 
+      <VideoCall roomCode={roomCode} user={user} players={gameData.players} currentTurn={gameData.currentTurn} />
       {/* Caméra */}
       <Camera onDartScored={handleDartScored} disabled={!isMyTurn || dartsThisTurn.length >= 3 || bust} />
 
